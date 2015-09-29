@@ -1,6 +1,7 @@
 import requests
 import time
 import json
+import math
 
 url = "https://api.tumblr.com/v2/blog/seat-safety-switch.tumblr.com/posts/text"
 
@@ -35,8 +36,7 @@ def get_entries(page_number, page_size=20):
     
 total_posts = get_post_count()
 page_size = 20 # default of tumblr api, probably a reasonable limit
-print (total_posts / page_size)
-pages = int(total_posts/page_size) + 1
+pages = int(math.ceil(total_posts/page_size)) + 1
 print 'Expecting to download', pages, 'pages'
 
 all_posts = []
