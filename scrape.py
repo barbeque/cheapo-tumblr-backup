@@ -35,7 +35,8 @@ def get_entries(page_number, page_size=20):
     
 total_posts = get_post_count()
 page_size = 20 # default of tumblr api, probably a reasonable limit
-pages = int(round(total_posts / page_size))
+print (total_posts / page_size)
+pages = int(total_posts/page_size) + 1
 print 'Expecting to download', pages, 'pages'
 
 all_posts = []
@@ -55,5 +56,6 @@ with open("posts.html", "w") as f:
             title = '<null>' if post.title == None else post.title
             f.write("<H1>" + title + "</H1>\n")
             f.write(post.body.encode('utf-8') + "\n")
+            f.write("<hr/>\n")
         else:
             print "Weird, encountered a null post"
