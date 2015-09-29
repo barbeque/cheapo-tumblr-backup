@@ -51,8 +51,11 @@ for i in range(0, pages):
 
 # all posts downloaded, write them to file
 with open("posts.html", "w") as f:
+    f.write("<head><meta charset='UTF-8'/></head>\n")
+    f.write("<body>\n")
     for post in all_posts:
         title = '<null>' if post.title == None else post.title.encode('utf-8')
         f.write("<H1>" + title + "</H1>\n")
         f.write(post.body.encode('utf-8') + "\n")
         f.write("<hr/>\n")
+    f.write("</body>\n")
