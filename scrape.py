@@ -15,14 +15,14 @@ class TumblrEntry:
         self.body = body
 
 def get_post_count():
-    r = requests.get(url)
+    r = requests.get(url, params = {'api_key': api_key})
     panic_on_bad_status(r)
     json = r.json()
     resp = json['response']
     return resp['total_posts']
 
 def get_entries(page_number, page_size=20):
-    r = requests.get(url, params = {'offset': page_number * page_size, 'limit': page_size})
+    r = requests.get(url, params = {'offset': page_number * page_size, 'limit': page_size, 'api_key': api_key})
     panic_on_bad_status(r)
 
     response = r.json()['response']
@@ -36,7 +36,14 @@ def get_entries(page_number, page_size=20):
 def panic_on_bad_status(resp):
     if resp.status_code != 200:
         print 'Unexpected status code', resp.status_code
-    
+
+def get_from_config(config_key):
+    import yaml
+    with open('config.yml', 'r') as c:
+        s = c.read()
+        return yaml.load(s)[config_key]
+
+api_key = get_from_config('api_key')
 total_posts = get_post_count()
 page_size = 20 # default of tumblr api, probably a reasonable limit
 pages = int(math.ceil(total_posts/page_size)) + 1
