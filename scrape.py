@@ -38,8 +38,11 @@ def panic_on_bad_status(resp):
         print 'Unexpected status code', resp.status_code
 
 def get_from_config(config_key):
-    import yaml
-    with open('config.yml', 'r') as c:
+    import yaml, os.path
+    config_path = 'config.yml'
+    if not os.path.isfile(config_path):
+        raise Exception("Cannot find config file. Please create a config file named {config_path} with the key {config_key} inside it.".format(config_path = config_path, config_key = config_key))
+    with open(config_path, 'r') as c:
         s = c.read()
         return yaml.load(s)[config_key]
 
