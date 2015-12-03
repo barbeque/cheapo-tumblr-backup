@@ -2,6 +2,9 @@ import requests
 import time
 import json
 import math
+import urllib3
+
+urllib3.disable_warnings() # disable ssl InsecurePlatform warning...
 
 url = "https://api.tumblr.com/v2/blog/seat-safety-switch.tumblr.com/posts/text"
 
