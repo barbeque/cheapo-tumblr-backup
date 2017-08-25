@@ -13,9 +13,10 @@ url = "https://api.tumblr.com/v2/blog/seat-safety-switch.tumblr.com/posts/text"
 # check response.total_posts for limit on offset parameter
 
 class TumblrEntry:
-    def __init__(self, title, body):
+    def __init__(self, title, body, url):
         self.title = title
         self.body = body
+	self.url = url
 
 def get_post_count():
     r = requests.get(url, params = {'api_key': api_key})
@@ -32,7 +33,7 @@ def get_entries(page_number, page_size=20):
     posts = response['posts']
     result = []
     for post in posts:
-        entry = TumblrEntry(post['title'], post['body'])
+        entry = TumblrEntry(post['title'], post['body'], post['post_url'])
         result.append(entry)
     return result
 
@@ -73,5 +74,6 @@ with open("posts.html", "w") as f:
         title = '<null>' if post.title == None else post.title.encode('utf-8')
         f.write("<H1>" + title + "</H1>\n")
         f.write(post.body.encode('utf-8') + "\n")
+	f.write("<a href='" + post.url.encode('utf-8') + "'>#</a>\n");
         f.write("<hr/>\n")
     f.write("</body>\n")
