@@ -3,14 +3,13 @@ import time
 import json
 import math
 import urllib3
+from config import get_from_config
 
 urllib3.disable_warnings() # disable ssl InsecurePlatform warning...
 
-url = "https://api.tumblr.com/v2/blog/ameliastardust.tumblr.com/posts/text"
-
-# move offset parameter
-# check response.posts.body, response.posts.title for content
-# check response.total_posts for limit on offset parameter
+# the API URL of the tumblr blog,
+# e.g. https://api.tumblr.com/v2/blog/seat-safety-switch.tumblr.com/posts/text
+url = get_from_config('url')
 
 class TumblrEntry:
     def __init__(self, title, body, url):
@@ -40,15 +39,6 @@ def get_entries(page_number, page_size=20):
 def panic_on_bad_status(resp):
     if resp.status_code != 200:
         print('Unexpected status code: {0:d}'.format(resp.status_code))
-
-def get_from_config(config_key):
-    import yaml, os.path
-    config_path = 'config.yml'
-    if not os.path.isfile(config_path):
-        raise Exception("Cannot find config file. Please create a config file named {config_path} with the key {config_key} inside it.".format(config_path = config_path, config_key = config_key))
-    with open(config_path, 'r') as c:
-        s = c.read()
-        return yaml.load(s)[config_key]
 
 api_key = get_from_config('api_key')
 total_posts = get_post_count()

@@ -2,7 +2,7 @@
 A scraper for largely-text tumblr blogs.
 
 ## What you need
- * A working Python 2.x installation. Python 3 compatibility will come eventually.
+ * A working Python 2.x (or 3.x) installation. 
  * A [Tumblr API key](https://www.tumblr.com/oauth/apps). You'll use the consumer key for this utility (see below)
  * The [API URL](https://www.tumblr.com/docs/en/api/v2#overview) for the blog you want to scrape.
 
