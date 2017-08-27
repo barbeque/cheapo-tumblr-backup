@@ -3,6 +3,7 @@ import time
 import json
 import math
 import urllib3
+import progressbar
 from config import get_from_config
 
 urllib3.disable_warnings() # disable ssl InsecurePlatform warning...
@@ -12,10 +13,14 @@ urllib3.disable_warnings() # disable ssl InsecurePlatform warning...
 url = get_from_config('url')
 
 class TumblrEntry:
+    def maybeUtf8(self, input):
+        if input is not None and type(input) is not str:
+            return input.encode('utf-8') # python 2
+        return input # python 3
     def __init__(self, title, body, url):
-        self.title = title
-        self.body = body
-        self.url = url
+        self.title = self.maybeUtf8(title)
+        self.body = self.maybeUtf8(body)
+        self.url = self.maybeUtf8(url)
 
 def get_post_count():
     r = requests.get(url, params = {'api_key': api_key})
@@ -48,10 +53,11 @@ print('Expecting to download {0:d} pages'.format(pages))
 
 all_posts = []
 
-for i in range(0, pages):
+progress_bar = progressbar.ProgressBar()
+
+for i in progress_bar(range(0, pages)):
     posts_this_page = get_entries(i, page_size)
     all_posts.extend(posts_this_page)
-    print('scraped page {0:d}'.format(i + 1))
     # don't be a dick, sleep between hits
     time.sleep(1)
 
@@ -60,17 +66,9 @@ with open("posts.html", "w") as f:
     f.write("<head><meta charset='UTF-8'/></head>\n")
     f.write("<body>\n")
     for post in all_posts:
-        # python2
-        if type(post.url) is not str:
-            title = '<null>' if post.title is None else post.title.encode('utf-8')
-            f.write("<H1>" + title + "</H1>\n")
-            f.write(post.body.encode('utf-8') + "\n".encode('utf-8'))
-            f.write("<a href='" + post.url.encode('utf-8') + "'>#</a>\n")
-        # python3
-        else:
-            title = '<null>' if post.title is None else post.title
-            f.write("<H1>" + title + "</H1>\n")
-            f.write(post.body + "\n")
-            f.write("<a href='" + post.url + "'>#</a>\n")
+        title = '<null>' if post.title is None else post.title
+        f.write("<H1>" + title + "</H1>\n")
+        f.write(post.body + "\n")
+        f.write("<a href='" + post.url + "'>#</a>\n")
         f.write("<hr/>\n")
     f.write("</body>\n")
