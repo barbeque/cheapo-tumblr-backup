@@ -17,10 +17,11 @@ class TumblrEntry:
         if input is not None and type(input) is not str:
             return input.encode('utf-8') # python 2
         return input # python 3
-    def __init__(self, title, body, url):
+    def __init__(self, title, body, url, tags):
         self.title = self.maybeUtf8(title)
         self.body = self.maybeUtf8(body)
         self.url = self.maybeUtf8(url)
+        self.tags = list(map(lambda t: self.maybeUtf8(t), tags))
 
 def get_post_count():
     r = requests.get(url, params = {'api_key': api_key})
@@ -37,7 +38,7 @@ def get_entries(page_number, page_size=20):
     posts = response['posts']
     result = []
     for post in posts:
-        entry = TumblrEntry(post['title'], post['body'], post['post_url'])
+        entry = TumblrEntry(post['title'], post['body'], post['post_url'], post['tags'])
         result.append(entry)
     return result
 
@@ -69,6 +70,10 @@ with open("posts.html", "w") as f:
         title = '<null>' if post.title is None else post.title
         f.write("<H1>" + title + "</H1>\n")
         f.write(post.body + "\n")
-        f.write("<a href='" + post.url + "'>#</a>\n")
+        f.write("<a href='" + post.url + "'>#</a> \n")
+        if len(post.tags) > 0:
+            f.write("tags: ")
+            f.write(", ".join(post.tags))
+            f.write("\n")
         f.write("<hr/>\n")
     f.write("</body>\n")
