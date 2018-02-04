@@ -1,5 +1,7 @@
 import yaml, os.path
 
+# TODO: Generate config file on first run?
+
 def get_from_config(config_key):
     config_path = 'config.yml'
     if not os.path.isfile(config_path):
