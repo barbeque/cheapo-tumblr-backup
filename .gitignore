@@ -2,3 +2,5 @@ env
 posts.html
 config.yml
 *.pyc
+*.jpg
+*.png

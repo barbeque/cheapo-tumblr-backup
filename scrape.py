@@ -1,4 +1,6 @@
 import requests
+from BeautifulSoup import BeautifulSoup
+import shutil
 import time
 import json
 import math
@@ -17,11 +19,16 @@ class TumblrEntry:
         if input is not None and type(input) is not str:
             return input.encode('utf-8') # python 2
         return input # python 3
-    def __init__(self, title, body, url, tags):
+    def get_photo_urls(self, photos):
+        photo_blobs = map(lambda p: p['alt_sizes'], photos)
+        photo_urls = map(lambda p: max(p, key=(lambda t: t['width']))['url'], photo_blobs)
+        return map(lambda p: self.maybeUtf8(p), photo_urls)
+    def __init__(self, title, body, url, tags, photos):
         self.title = self.maybeUtf8(title)
         self.body = self.maybeUtf8(body)
         self.url = self.maybeUtf8(url)
         self.tags = list(map(lambda t: self.maybeUtf8(t), tags))
+        self.photos = self.get_photo_urls(photos)
 
 def get_post_count():
     r = requests.get(url, params = {'api_key': api_key})
@@ -38,8 +45,16 @@ def get_entries(page_number, page_size=20):
     posts = response['posts']
     result = []
     for post in posts:
-        entry = TumblrEntry(post['title'], post['body'], post['post_url'], post['tags'])
-        result.append(entry)
+        if post['type'] == 'text':
+            # probably text
+            entry = TumblrEntry(post['title'], post['body'], post['post_url'], post['tags'], [])
+            result.append(entry)
+        elif post['type'] == 'photo':
+            # maybe a photo set
+            entry = TumblrEntry(post['caption'], '', post['post_url'], post['tags'], post['photos'])
+            result.append(entry)
+        else:
+            print 'unhandled post type: ' + post['type']
     return result
 
 def panic_on_bad_status(resp):
@@ -51,6 +66,26 @@ total_posts = get_post_count()
 page_size = 20 # default of tumblr api, probably a reasonable limit
 pages = int(math.ceil(total_posts/page_size)) + 1
 print('Expecting to download {0:d} pages'.format(pages))
+
+def download_image(image_url):
+    print 'downloading image at ' + image_url
+    local_filename = image_url.split('/')[-1]
+    # TODO: prefix soon, so we can package this?
+    r = requests.get(image_url, stream=True)
+    with open(local_filename, 'wb') as f:
+        shutil.copyfileobj(r.raw, f)
+
+    return local_filename
+
+def download_images_in_body(body):
+    """ download images in the body, rewriting the HTML if so """
+    soup = BeautifulSoup(body)
+    for img in soup.findAll('img'):
+        # download image
+        local_filename = download_image(img['src'])
+        # point the tag to the local copy, not the internet
+        img['src'] = local_filename
+    return str(soup)
 
 all_posts = []
 
@@ -69,7 +104,12 @@ with open("posts.html", "w") as f:
     for post in all_posts:
         title = '<null>' if post.title is None else post.title
         f.write("<H1>" + title + "</H1>\n")
-        f.write(post.body + "\n")
+        if len(post.body) > 0:
+            f.write(post.body + "\n")
+        else:
+            for photo in post.photos:
+                local_photo = download_image(photo)
+                f.write('<img src="' + local_photo + '"/>\n')
         f.write("<a href='" + post.url + "'>#</a> \n")
         if len(post.tags) > 0:
             f.write("tags: ")

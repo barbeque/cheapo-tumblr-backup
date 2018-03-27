@@ -2,3 +2,4 @@ requests
 pyyaml
 urllib3
 progressbar2
+beautifulsoup
