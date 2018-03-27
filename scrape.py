@@ -1,5 +1,4 @@
 import requests
-from BeautifulSoup import BeautifulSoup
 import shutil
 import time
 import json
@@ -78,16 +77,6 @@ def download_image(image_url):
         shutil.copyfileobj(r.raw, f)
 
     return local_filename
-
-def download_images_in_body(body):
-    """ download images in the body, rewriting the HTML if so """
-    soup = BeautifulSoup(body)
-    for img in soup.findAll('img'):
-        # download image
-        local_filename = download_image(img['src'])
-        # point the tag to the local copy, not the internet
-        img['src'] = local_filename
-    return str(soup)
 
 all_posts = []
 
