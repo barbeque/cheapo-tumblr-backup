@@ -11,7 +11,7 @@ from config import get_from_config
 urllib3.disable_warnings() # disable ssl InsecurePlatform warning...
 
 # the API URL of the tumblr blog,
-# e.g. https://api.tumblr.com/v2/blog/seat-safety-switch.tumblr.com/posts/text
+# e.g. https://api.tumblr.com/v2/blog/seat-safety-switch.tumblr.com/posts/
 url = get_from_config('url')
 
 class TumblrEntry:
@@ -21,6 +21,7 @@ class TumblrEntry:
         return input # python 3
     def get_photo_urls(self, photos):
         photo_blobs = map(lambda p: p['alt_sizes'], photos)
+        # fetch the best-quality (biggest) version of the pic
         photo_urls = map(lambda p: max(p, key=(lambda t: t['width']))['url'], photo_blobs)
         return map(lambda p: self.maybeUtf8(p), photo_urls)
     def __init__(self, title, body, url, tags, photos):
@@ -72,6 +73,7 @@ def download_image(image_url):
     local_filename = image_url.split('/')[-1]
     # TODO: prefix soon, so we can package this?
     r = requests.get(image_url, stream=True)
+    panic_on_bad_status(r)
     with open(local_filename, 'wb') as f:
         shutil.copyfileobj(r.raw, f)
 
