@@ -5,9 +5,12 @@ import json
 import math
 import urllib3
 import progressbar
+import os
 from config import get_from_config
 
 urllib3.disable_warnings() # disable ssl InsecurePlatform warning...
+
+PREFIX='posts'
 
 # the API URL of the tumblr blog,
 # e.g. https://api.tumblr.com/v2/blog/seat-safety-switch.tumblr.com/posts/
@@ -70,6 +73,7 @@ print('Expecting to download {0:d} pages'.format(pages))
 def download_image(image_url):
     print 'downloading image at ' + image_url
     local_filename = image_url.split('/')[-1]
+    local_filename = os.path.join(PREFIX, local_filename)
     # TODO: prefix soon, so we can package this?
     r = requests.get(image_url, stream=True)
     panic_on_bad_status(r)
@@ -78,6 +82,11 @@ def download_image(image_url):
 
     return local_filename
 
+# make a directory to use to store
+if not os.path.exists(PREFIX):
+    os.makedirs(PREFIX)
+
+# begin scrape
 all_posts = []
 
 progress_bar = progressbar.ProgressBar()
@@ -89,7 +98,8 @@ for i in progress_bar(range(0, pages)):
     time.sleep(1)
 
 # all posts downloaded, write them to file
-with open("posts.html", "w") as f:
+posts_file_path = os.path.join(PREFIX, 'posts.html')
+with open(posts_file_path, "w") as f:
     f.write("<head><meta charset='UTF-8'/></head>\n")
     f.write("<body>\n")
     for post in all_posts:
