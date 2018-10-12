@@ -63,8 +63,21 @@ def get_entries(page_number, page_size=20):
             entry = TumblrEntry(post['title'], body, post['post_url'], post['tags'], [])
             result.append(entry)
         elif post['type'] == 'quote':
-            body = '&#8220;' + post['text'] + '&#8221;<br/> ~' + post['source']
+            body = '&#8220;' + post['text'] + '&#8221;<br/> ~' + post['source'] + '<br/>'
             entry = TumblrEntry('', body, post['post_url'], post['tags'], [])
+            result.append(entry)
+        elif post['type'] == 'chat':
+            # There is also the 'dialogue' array, which is good for formatting,
+            # but I don't think I need to reformat
+            body = ''
+            for entry in post['dialogue']:
+                if len(entry['name']) > 0:
+                    body += '<b>' + entry['name'] + '</b>: ' + entry['phrase']
+                else:
+                    # just text, no name
+                    body += entry['phrase']
+                body += '<br/>'
+            entry = TumblrEntry(post['title'], body, post['post_url'], post['tags'], [])
             result.append(entry)
         else:
             print 'unhandled post type: ' + post['type']
