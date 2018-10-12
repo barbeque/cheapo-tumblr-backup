@@ -56,6 +56,12 @@ def get_entries(page_number, page_size=20):
             # maybe a photo set
             entry = TumblrEntry(post['caption'], '', post['post_url'], post['tags'], post['photos'])
             result.append(entry)
+        elif post['type'] == 'link':
+            # A link
+            header = '<a href="' + post['url'] + '">' + post['title'] + '</a>'
+            body = header + "<br/>" + post['description']
+            entry = TumblrEntry(post['title'], body, post['post_url'], post['tags'], [])
+            result.append(entry)
         else:
             print 'unhandled post type: ' + post['type']
     return result
