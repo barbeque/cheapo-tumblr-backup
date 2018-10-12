@@ -62,6 +62,10 @@ def get_entries(page_number, page_size=20):
             body = header + "<br/>" + post['description']
             entry = TumblrEntry(post['title'], body, post['post_url'], post['tags'], [])
             result.append(entry)
+        elif post['type'] == 'quote':
+            body = '&#8220;' + post['text'] + '&#8221;<br/> ~' + post['source']
+            entry = TumblrEntry('', body, post['post_url'], post['tags'], [])
+            result.append(entry)
         else:
             print 'unhandled post type: ' + post['type']
     return result
