@@ -72,15 +72,15 @@ def get_entries(page_number, page_size=20):
             body = ''
             for entry in post['dialogue']:
                 if len(entry['name']) > 0:
-                    body += '<b>' + entry['name'] + '</b>: ' + entry['phrase']
+                    body += '<b class="chat-name">' + entry['name'] + '</b>: ' + '<span class="chat-phrase">' + entry['phrase'] + '</span>'
                 else:
                     # just text, no name
-                    body += entry['phrase']
+                    body += '<span class="chat-phrase">' + entry['phrase'] + '</span>'
                 body += '<br/>'
             entry = TumblrEntry(post['title'], body, post['post_url'], post['tags'], [])
             result.append(entry)
         else:
-            print 'unhandled post type: ' + post['type']
+            print('unhandled post type: ' + post['type'])
     return result
 
 def panic_on_bad_status(resp):
@@ -94,7 +94,7 @@ pages = int(math.ceil(total_posts/page_size)) + 1
 print('Expecting to download {0:d} pages'.format(pages))
 
 def download_image(image_url):
-    print 'downloading image at ' + image_url
+    print('downloading image at ' + image_url)
     local_filename = image_url.split('/')[-1]
     local_filename = os.path.join(PREFIX, local_filename)
     # TODO: prefix soon, so we can package this?
@@ -126,6 +126,7 @@ with open(posts_file_path, "w") as f:
     f.write("<head><meta charset='UTF-8'/></head>\n")
     f.write("<body>\n")
     for post in all_posts:
+        f.write('<div class="post">\n')
         title = '<null>' if post.title is None else post.title
         f.write("<H1>" + title + "</H1>\n")
         if len(post.body) > 0:
@@ -140,4 +141,5 @@ with open(posts_file_path, "w") as f:
             f.write(", ".join(post.tags))
             f.write("\n")
         f.write("<hr/>\n")
+        f.write('</div>\n')
     f.write("</body>\n")
