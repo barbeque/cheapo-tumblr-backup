@@ -6,15 +6,24 @@ import math
 import urllib3
 import progressbar
 import os
+from optparse import OptionParser
 from config import get_from_config
 
 urllib3.disable_warnings() # disable ssl InsecurePlatform warning...
 
 PREFIX='posts'
 
+parser = OptionParser()
+parser.add_option('-u', '--user', dest='user', help='The name of the user whose tumblr you are going to scrape.')
+
+(options, args) = parser.parse_args()
+
 # the API URL of the tumblr blog,
 # e.g. https://api.tumblr.com/v2/blog/seat-safety-switch.tumblr.com/posts/
-url = get_from_config('url')
+if not options.user:
+    url = get_from_config('url')
+else:
+    url = f'https://api.tumblr.com/v2/blog/{options.user}.tumblr.com/posts/text'
 
 class TumblrEntry:
     def maybeUtf8(self, input):
