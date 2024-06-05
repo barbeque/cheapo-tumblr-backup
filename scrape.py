@@ -5,7 +5,8 @@ import json
 import math
 import urllib3
 import progressbar
-import os
+import os, sys
+import re
 from optparse import OptionParser
 from config import get_from_config
 
@@ -18,10 +19,18 @@ parser.add_option('-u', '--user', dest='user', help='The name of the user whose 
 
 (options, args) = parser.parse_args()
 
+
+def generate_edit_url_for_post(post_url):
+    # input: https://seatsafetyswitch.com/post/720388323541172224/theres-something-that-we-all-can-learn-from-stage
+    # output: https://www.tumblr.com/edit/seat-safety-switch/720388323541172224
+    number_parts = re.search('(\/([0-9]+)\/)', post_url).groups()
+    return f'https://www.tumblr.com/edit/{options.user}/{number_parts[1]}'
+
 # the API URL of the tumblr blog,
 # e.g. https://api.tumblr.com/v2/blog/seat-safety-switch.tumblr.com/posts/
 if not options.user:
     url = get_from_config('url')
+    options.user = 'seat-safety-switch' # hack
 else:
     url = f'https://api.tumblr.com/v2/blog/{options.user}.tumblr.com/posts/text'
 
@@ -134,7 +143,7 @@ for i in progress_bar(range(0, pages)):
 BEST_OF_THRESHOLD = 1000
 for post in all_posts:
     if post.note_count >= BEST_OF_THRESHOLD and ('best of' not in post.tags):
-        print(f'Post {post.url} has {post.note_count} notes, but is not marked best-of')
+        print(f'Post {generate_edit_url_for_post(post.url)} has {post.note_count} notes, but is not marked best-of')
 
 # all posts downloaded, write them to file
 posts_file_path = os.path.join(PREFIX, 'posts.html')
