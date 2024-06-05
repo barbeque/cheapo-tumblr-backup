@@ -35,10 +35,11 @@ class TumblrEntry:
         # fetch the best-quality (biggest) version of the pic
         photo_urls = map(lambda p: max(p, key=(lambda t: t['width']))['url'], photo_blobs)
         return map(lambda p: self.maybeUtf8(p), photo_urls)
-    def __init__(self, title, body, url, tags, photos):
+    def __init__(self, title, body, url, tags, photos, note_count):
         self.title = self.maybeUtf8(title)
         self.body = self.maybeUtf8(body)
         self.url = self.maybeUtf8(url)
+        self.note_count = note_count
         self.tags = list(map(lambda t: self.maybeUtf8(t), tags))
         self.photos = self.get_photo_urls(photos)
 
@@ -59,21 +60,21 @@ def get_entries(page_number, page_size=20):
     for post in posts:
         if post['type'] == 'text':
             # probably text
-            entry = TumblrEntry(post['title'], post['body'], post['post_url'], post['tags'], [])
+            entry = TumblrEntry(post['title'], post['body'], post['post_url'], post['tags'], [], post['note_count'])
             result.append(entry)
         elif post['type'] == 'photo':
             # maybe a photo set
-            entry = TumblrEntry(post['caption'], '', post['post_url'], post['tags'], post['photos'])
+            entry = TumblrEntry(post['caption'], '', post['post_url'], post['tags'], post['photos'], post['note_count'])
             result.append(entry)
         elif post['type'] == 'link':
             # A link
             header = '<a href="' + post['url'] + '">' + post['title'] + '</a>'
             body = header + "<br/>" + post['description']
-            entry = TumblrEntry(post['title'], body, post['post_url'], post['tags'], [])
+            entry = TumblrEntry(post['title'], body, post['post_url'], post['tags'], [], post['note_count'])
             result.append(entry)
         elif post['type'] == 'quote':
             body = '&#8220;' + post['text'] + '&#8221;<br/> ~' + post['source'] + '<br/>'
-            entry = TumblrEntry('', body, post['post_url'], post['tags'], [])
+            entry = TumblrEntry('', body, post['post_url'], post['tags'], [], post['note_count'])
             result.append(entry)
         elif post['type'] == 'chat':
             # There is also the 'dialogue' array, which is good for formatting,
@@ -86,7 +87,7 @@ def get_entries(page_number, page_size=20):
                     # just text, no name
                     body += '<span class="chat-phrase">' + entry['phrase'] + '</span>'
                 body += '<br/>'
-            entry = TumblrEntry(post['title'], body, post['post_url'], post['tags'], [])
+            entry = TumblrEntry(post['title'], body, post['post_url'], post['tags'], [], post['note_count'])
             result.append(entry)
         else:
             print('unhandled post type: ' + post['type'])
@@ -128,6 +129,12 @@ for i in progress_bar(range(0, pages)):
     all_posts.extend(posts_this_page)
     # don't be a dick, sleep between hits
     time.sleep(1)
+
+# check for posts that should be tagged 'best of' but aren't
+BEST_OF_THRESHOLD = 1000
+for post in all_posts:
+    if post.note_count >= BEST_OF_THRESHOLD and ('best of' not in post.tags):
+        print(f'Post {post.url} has {post.note_count} notes, but is not marked best-of')
 
 # all posts downloaded, write them to file
 posts_file_path = os.path.join(PREFIX, 'posts.html')
