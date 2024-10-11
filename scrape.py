@@ -146,6 +146,8 @@ for post in all_posts:
     if post.note_count >= BEST_OF_THRESHOLD and ('best of' not in post.tags):
         print(f'Post {generate_edit_url_for_post(post.url)} has {post.note_count} notes, but is not marked best-of')
 
+total_words = 0
+
 # all posts downloaded, write them to file
 posts_file_path = os.path.join(PREFIX, 'posts.html')
 with open(posts_file_path, "w") as f:
@@ -158,6 +160,7 @@ with open(posts_file_path, "w") as f:
         f.write("<h3>" + post.date + "</h3>\n")
         if len(post.body) > 0:
             f.write(post.body + "\n")
+            total_words += len(re.findall(r'\w+', post.body))
         else:
             for photo in post.photos:
                 local_photo = download_image(photo)
@@ -170,3 +173,7 @@ with open(posts_file_path, "w") as f:
         f.write("<hr/>\n")
         f.write('</div>\n')
     f.write("</body>\n")
+
+print('Stats:')
+print(f'Total posts: {total_posts}')
+print(f'Total words: {total_words}')
