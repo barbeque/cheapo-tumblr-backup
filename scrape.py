@@ -175,5 +175,5 @@ with open(posts_file_path, "w") as f:
     f.write("</body>\n")
 
 print('Stats:')
-print(f'Total posts: {total_posts}')
-print(f'Total words: {total_words}')
+print(f'Total posts: {total_posts:,}')
+print(f'Total words: {total_words:,}')
