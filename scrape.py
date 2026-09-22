@@ -53,14 +53,14 @@ class TumblrEntry:
         self.tags = list(map(lambda t: self.maybeUtf8(t), tags))
         self.photos = self.get_photo_urls(photos)
 
-def get_post_count():
+def get_post_count() -> int:
     r = requests.get(url, params = {'api_key': api_key})
     panic_on_bad_status(r)
     json = r.json()
     resp = json['response']
     return resp['total_posts']
 
-def get_entries(page_number, page_size=20):
+def get_entries(page_number : int, page_size=20) -> list[TumblrEntry]:
     r = requests.get(url, params = {'offset': page_number * page_size, 'limit': page_size, 'api_key': api_key})
     panic_on_bad_status(r)
 
