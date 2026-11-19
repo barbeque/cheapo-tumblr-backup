@@ -1,7 +1,9 @@
+from typing import Any
+
 import requests
 import shutil
 import time
-import json
+import jsonpickle
 import math
 import urllib3
 import progressbar
@@ -173,6 +175,11 @@ with open(posts_file_path, "w") as f:
         f.write("<hr/>\n")
         f.write('</div>\n')
     f.write("</body>\n")
+
+# dump them as json too, just in case
+with open('dump.json', 'w') as f:
+    s = jsonpickle.encode(all_posts)
+    f.write(s)
 
 print('Stats:')
 print(f'Total posts: {total_posts:,}')
