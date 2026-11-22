@@ -177,7 +177,7 @@ with open(posts_file_path, "w") as f:
     f.write("</body>\n")
 
 # dump them as json too, just in case
-with open('dump.json', 'w') as f:
+with open('everything.json', 'w') as f:
     s = jsonpickle.encode(all_posts, indent=2)
     f.write(s)
 
